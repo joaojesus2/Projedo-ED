@@ -20,14 +20,25 @@ int adicionarFila(No **front, No **back, int valor){
 }
 
 int filaVazia(No *inicio){
-    if(inicio == NULL)
+    if(inicio == NULL){
+        printf("A fila está vazia\n");
         return 1;
+    }
     return 0;
+}
+
+void mostrarPilha(No *topo){
+    printf("teste");
+    No *No = topo;
+    while(No != NULL){
+        printf("\t| %d |\n",No->data);
+        No = No->prox;
+        }
 }
 
 void mostrarFila(No *f){
     printf("\n|");
-    No *no = f;
+    No* no = f;
     while(no != NULL){
         printf(" %d |", no->data);
         no = no->prox;
@@ -35,13 +46,17 @@ void mostrarFila(No *f){
     printf("\n");
 }
 
-void atenderPaciente(No **front, No **back){
-    No *temp =front;
+void atenderPaciente(No **front, No **back, No **topo ){
+    No *novoNo = (No *)malloc(sizeof(No));
+    No *temp = *front;
+    novoNo->data = temp->data;
+    novoNo->prox = *topo;
+    *topo = novoNo;
     int valor = temp->data;
     *front = (*front)->prox;
-
+    
     if(*front == NULL){  // Se front == NULL, a lista está vazia
-        back = NULL;
+        *back = NULL;
     }
     free(temp);
     return valor;
@@ -49,6 +64,7 @@ void atenderPaciente(No **front, No **back){
 
 int main()
 {
+    No *topo = NULL;
     No *inicio = NULL;
     No *fim = NULL;
     char opcao = -1;
@@ -68,16 +84,17 @@ int main()
                 break;
             case 2:
                 if(!filaVazia(inicio)){
-                    atenderPaciente(&inicio, &fim);
+                    atenderPaciente(&inicio, &fim, &topo);
                     printf("Paciente removido da fila\n");
                 }
-                else
-                    printf("A fila está vazia\n");
                 break;
             case 3:
                 if(!filaVazia(inicio))
                     mostrarFila(inicio);
                     break;
+            case 4:
+                mostrarPilha(&topo);
+                break;
         }
     }while(opcao != 0);
     return 0;
