@@ -85,9 +85,8 @@ int removerFila(No **lista, const char *valor) {
     No *atual = *lista;
     No *anterior = NULL;
     
-    if(atual == NULL) {
+    if(atual == NULL) 
         return 0;
-    }
     if(strcmp(atual->data, valor) == 0){
         *lista = atual->prox;
         free(atual);
@@ -97,6 +96,8 @@ int removerFila(No **lista, const char *valor) {
         anterior = atual;
         atual = atual->prox;
     }
+    if(atual == NULL) 
+        return 0;
     anterior->prox = atual->prox;
     free(atual);
     return 1;
@@ -140,15 +141,16 @@ int main()
                     printf("Resposta inválida!");
                 break;
             case 2:
-                if(!filaVazia(inicio) || !filaVazia(inicioP)){
-                    if(inicioP == NULL)
-                        atenderPaciente(&inicio, &fim, &topo);
-                    else   
-                        atenderPaciente(&inicioP, &fimP, &topo);
+                if(!filaVazia(inicioP)){
+                    atenderPaciente(&inicioP, &fimP, &topo);
+                    printf("Paciente removido da fila\n");
+                }
+                else if(!filaVazia(inicio)){
+                    atenderPaciente(&inicio, &fim, &topo);
                     printf("Paciente removido da fila\n");
                 }
                 else
-                    printf("Nenhum paciente foi atendido, pois a fila estava vazia.");
+                     printf("Nenhum paciente foi atendido, pois a fila estava vazia.");
                 break;
             case 3:
                 if(!filaVazia(inicio) || !filaVazia(inicioP))
@@ -170,13 +172,15 @@ int main()
                 if(!pilhaVazia(topo))
                     printf("Último paciente atendido foi:  %s\n",topo->data);
                 break;
-            case 7:
-                printf("Digite a identidade do paciente: ");
-                scanf(" %[^\n]", valor);
-                if(removerFila(&inicio, valor) || removerFila(&inicioP, valor))
-                    printf("O paciente foi removido da fila\n");
-                else
-                    printf("O paciente não foi encontrado\n");
+            case 7:   
+                if(!filaVazia(inicio) || !filaVazia(inicioP)){
+                    printf("Digite a identidade do paciente: ");
+                    scanf(" %[^\n]", valor);
+                    if(removerFila(&inicio, valor) || removerFila(&inicioP, valor))
+                        printf("O paciente foi removido da fila\n");
+                    else
+                        printf("O paciente não foi encontrado\n");
+                    }
                     break;
             default:
                 printf("Opção inválida!\n");
