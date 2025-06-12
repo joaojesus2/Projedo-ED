@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-typedef struct{
-    int data;
+typedef struct No{
+    char data[50];
     struct No *prox;
 }No;
 
 int adicionarFila(No **front, No **back, int valor){
     No *novoNo = (No *)malloc(sizeof(No));
-    novoNo->data = valor;
+    strcpy(novoNo->data, valor);
         if(*back == NULL){
             *front = novoNo;
             *back = novoNo;
@@ -17,6 +18,14 @@ int adicionarFila(No **front, No **back, int valor){
             (*back)->prox = novoNo;
             *back = novoNo;
         }
+}
+
+int pilhaVazia(No *topo){
+    if(topo == NULL){
+        printf("Nenhum paciente foi atendido ainda\n");
+        return 1;
+    }
+    return 0;
 }
 
 int filaVazia(No *inicio){
@@ -28,37 +37,43 @@ int filaVazia(No *inicio){
 }
 
 void mostrarPilha(No *topo){
-    printf("teste");
-    No *No = topo;
-    while(No != NULL){
-        printf("\t| %d |\n",No->data);
-        No = No->prox;
+    printf("Pacientes atendidos:\n");
+    No *pNo = topo;
+    while(pNo != NULL){
+        printf("\t| %s |\n",pNo->data);
+        pNo = pNo->prox;
         }
 }
 
-void mostrarFila(No *f){
+
+void mostrarFila(No *f, No *fP){
     printf("\n|");
-    No* no = f;
+    No *no = f;
+    No *noP = fP;
+    while(noP != NULL){
+        printf(" %s |", noP->data);
+        noP = noP->prox;
+    }
     while(no != NULL){
-        printf(" %d |", no->data);
+        printf(" %s |", no->data);
         no = no->prox;
     }
     printf("\n");
 }
 
-void atenderPaciente(No **front, No **back, No **topo ){
-    No *novoNo = (No *)malloc(sizeof(No));
+int atenderPaciente(No **front, No **back, No **topo){
     No *temp = *front;
-    novoNo->data = temp->data;
-    novoNo->prox = *topo;
-    *topo = novoNo;
     int valor = temp->data;
     *front = (*front)->prox;
     
     if(*front == NULL){  // Se front == NULL, a lista está vazia
         *back = NULL;
     }
-    free(temp);
+    //free(temp);
+    temp->prox = NULL;
+    if(*topo != NULL)
+        temp->prox = *topo;
+    *topo = temp;
     return valor;
 }
 
@@ -67,35 +82,68 @@ int main()
     No *topo = NULL;
     No *inicio = NULL;
     No *fim = NULL;
+    No *inicioP = NULL;
+    No *fimP = NULL;
+    char valor[50];
+    char simNao;
     char opcao = -1;
-    int prioridade;
     do{
-        printf("1 - Colocar paciente na fila\n"
-               "2 - Atender paciente\n"
-               "0 - Fechar\n"
-               "Digite a opção: "
-                );
+        printf("\n========================================\n"
+               "    SISTEMA DE GERENCIAMENTO DE FILA    \n"
+               "========================================\n"
+               "1 - Adicionar paciente à fila\n"
+               "2 - Atender próximo paciente\n"
+               "3 - Mostrar fila de espera\n"
+               "4 - Mostrar pacientes já atendidos\n"
+               "5 - Ver próximo paciente\n"
+               "6 - Ver último paciente atendido\n"
+               "0 - Encerrar o programa\n\n"
+               "Digite a opção desejada: ");
         scanf("%hhu",&opcao);
         switch(opcao){
             case 1:
-                scanf("%d",&prioridade);
-                adicionarFila(&inicio, &fim, prioridade);
+                printf("Digite a identidade do pacinete: ");
+                scanf(" %s", &valor);
+                printf("O paciente recebe atendimento prioritário? (y/n)\n");
+                scanf(" %c", &simNao);
+                if(simNao == 'n' || simNao == 'N')
+                    adicionarFila(&inicio, &fim, valor);
+                else if(simNao == 'y' || simNao == 'Y')
+                    adicionarFila(&inicioP, &fimP, valor);
+                else
+                    printf("Resposta invalida!");
                 printf("Paciente adicionado à fila\n");
                 break;
             case 2:
-                if(!filaVazia(inicio)){
-                    atenderPaciente(&inicio, &fim, &topo);
+                if(!filaVazia(inicio) || filaVazia(inicioP)){
+                    if(inicioP == NULL)
+                        atenderPaciente(&inicio, &fim, &topo);
+                    else   
+                        atenderPaciente(&inicioP, &fimP, &topo);
                     printf("Paciente removido da fila\n");
                 }
                 break;
             case 3:
-                if(!filaVazia(inicio))
-                    mostrarFila(inicio);
-                    break;
+                if(!filaVazia(inicio) || !filaVazia(inicioP)){
+                    mostrarFila(inicio, inicioP);
+                }
+                break;
             case 4:
-                mostrarPilha(&topo);
+                if(!pilhaVazia(topo))
+                    mostrarPilha(topo);
+                break;
+            case 5:
+                if(!filaVazia(inicioP))
+                    printf("Próximo paciente é: %s\n",inicioP->data);
+                if(!filaVazia(inicio))
+                    printf("Próximo paciente é: %s\n",inicio->data);
+                break;
+            case 6:
+                if(!pilhaVazia(topo))
+                    printf("Último paciente atendido foi:  %s\n",topo->data);
                 break;
         }
     }while(opcao != 0);
+    printf("Encerrando o programa...\n");
     return 0;
 }
