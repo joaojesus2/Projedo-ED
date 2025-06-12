@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct{
+    int data;
+    struct No *prox;
+}No;
+
+int adicionarFila(No **front, No **back, int valor){
+    No *novoNo = (No *)malloc(sizeof(No));
+    novoNo->data = valor;
+        if(*back == NULL){
+            *front = novoNo;
+            *back = novoNo;
+            novoNo->prox = NULL;
+        }else{
+            (*back)->prox = novoNo;
+            *back = novoNo;
+        }
+}
+
+int filaVazia(No *inicio){
+    if(inicio == NULL)
+        return 1;
+    return 0;
+}
+
+void mostrarFila(No *f){
+    printf("\n|");
+    No *no = f;
+    while(no != NULL){
+        printf(" %d |", no->data);
+        no = no->prox;
+    }
+    printf("\n");
+}
+
+void atenderPaciente(No **front, No **back){
+    No *temp =front;
+    int valor = temp->data;
+    *front = (*front)->prox;
+
+    if(*front == NULL){  // Se front == NULL, a lista está vazia
+        back = NULL;
+    }
+    free(temp);
+    return valor;
+}
+
+int main()
+{
+    No *inicio = NULL;
+    No *fim = NULL;
+    char opcao = -1;
+    int prioridade;
+    do{
+        printf("1 - Colocar paciente na fila\n"
+               "2 - Atender paciente\n"
+               "0 - Fechar\n"
+               "Digite a opção: "
+                );
+        scanf("%hhu",&opcao);
+        switch(opcao){
+            case 1:
+                scanf("%d",&prioridade);
+                adicionarFila(&inicio, &fim, prioridade);
+                printf("Paciente adicionado à fila\n");
+                break;
+            case 2:
+                if(!filaVazia(inicio)){
+                    atenderPaciente(&inicio, &fim);
+                    printf("Paciente removido da fila\n");
+                }
+                else
+                    printf("A fila está vazia\n");
+                break;
+            case 3:
+                if(!filaVazia(inicio))
+                    mostrarFila(inicio);
+                    break;
+        }
+    }while(opcao != 0);
+    return 0;
+}
