@@ -1,0 +1,2 @@
+Nome padrão dos arquivos - "fila.txt", "fila_prioridade.txt", "pilha.txt"
+Criar nesta pasta. Qualquer alteração de path, favor alterar no src/main.c

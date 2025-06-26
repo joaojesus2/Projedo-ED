@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+char arquivoPilha[50];
+char arquivoFila[50];
+char arquivoFilaPrioridade[50];
+
 typedef struct No{
     char data[50];
     struct No *prox;
@@ -175,8 +179,8 @@ int carregarDadosFilaTXT(No **inicio, No **fim, const char *nomeArquivo) {
 }
 
 // Carrega os dados do arquivo da pilha 
-int carregarDadosPilhaTXT(No **topo, const char *nomeArquivo) {
-    FILE *arquivo = fopen(nomeArquivo, "r");    // Abre o arquivo para leitura 
+int carregarDadosPilhaTXT(No **topo) {
+    FILE *arquivo = fopen(arquivoPilha, "r");    // Abre o arquivo para leitura 
     if (arquivo == NULL) return -1;     // Erro 
     
     char linha[50];
@@ -193,8 +197,8 @@ int carregarDadosPilhaTXT(No **topo, const char *nomeArquivo) {
 
 // Atualiza os dados da fila no arquivo - sobrescrita
 int atualizarDadosFilaTXT(No *inicio, const char *nomeArquivo) {
-    FILE *arquivo = fopen(nomeArquivo, "w");    // Abre o arquivo para escrita
-    if (arquivo == NULL) return -1;     // Erro
+    FILE *arquivo = fopen(nomeArquivo, "w");    
+    if (arquivo == NULL) return -1;     
     No *atual = inicio;
     
     // Atualiza o arquivo com os dados da fila atual 
@@ -203,12 +207,12 @@ int atualizarDadosFilaTXT(No *inicio, const char *nomeArquivo) {
         atual = atual->prox;
     }
 
-    fclose(arquivo); // Fecha o arquivo
+    fclose(arquivo); 
     return 0;
 }
 
 // Atualiza os dados da pilha no arquivo - sobrescrita
-int atualizarDadosPilhaTXT(No *topo, const char *nomeArquivo) {
+int atualizarDadosPilhaTXT(No *topo) {
     int tamanho = 0;
     No *atual = topo;
 
@@ -225,7 +229,7 @@ int atualizarDadosPilhaTXT(No *topo, const char *nomeArquivo) {
         atual = atual->prox;
     }
 
-    FILE *arquivo = fopen(nomeArquivo, "w"); 
+    FILE *arquivo = fopen(arquivoPilha, "w"); 
     
     if (arquivo == NULL) {
         free(vetor);
@@ -246,23 +250,17 @@ int atualizarDadosPilhaTXT(No *topo, const char *nomeArquivo) {
 int inicializarDadosTXT(No **inicio, No **fim, No **inicioP, No **fimP, No **topo) {
     
     // Abre o arquivo da fila não prioritária e carrega os dados 
-    char arqFila[50];
-    strcpy(arqFila, "db/fila.txt");
-    if (carregarDadosFilaTXT(inicio, fim, arqFila) == -1) {
+    if (carregarDadosFilaTXT(inicio, fim, arquivoFila) == -1) {
         return -1;
     }
 
     // Abre o arquivo da fila prioritária e carrega os dados
-    char arqFilaP[50];
-    strcpy(arqFilaP, "db/fila_prioridade.txt");
-    if (carregarDadosFilaTXT(inicioP, fimP, arqFilaP) == -1) {
+    if (carregarDadosFilaTXT(inicioP, fimP, arquivoFilaPrioridade) == -1) {
         return -1;
     }
 
     // Abre o arquivo da pilha e carrega os dados
-    char arqPilha[50];
-    strcpy(arqPilha, "db/pilha.txt");
-    if(carregarDadosPilhaTXT(topo, arqPilha) == -1) {
+    if(carregarDadosPilhaTXT(topo, arquivoPilha) == -1) {
         return -1;
     }
 }
@@ -282,13 +280,14 @@ void inserirPacienteInicioFila(No **front, No**back, const char *data) {
 
 // Atende o paciente
 void atenderPaciente(No **front, No **back, No **topo, const char *nomeArquivoFila){
-    char data[50];  // buffer para dados do paciente
-    strcpy(data, (*front)->data);   // Salva os dados do paciente
-    removerPacienteFila(front, back);   // Remove o paciente da fila
-    push(topo, data);   // Adiciona o paciente a pilha de log
+    
+    char data[50];  
+    strcpy(data, (*front)->data);   
+    removerPacienteFila(front, back);   
+    push(topo, data);   
 
     // Tenta atualizar os arquivos com as alterações - caso não dê alerta e desfaz as alterações
-    if (atualizarDadosFilaTXT(*front, nomeArquivoFila) == -1 || atualizarDadosPilhaTXT(*topo, "db/pilha.txt") == -1) {
+    if (atualizarDadosFilaTXT(*front, nomeArquivoFila) == -1 || atualizarDadosPilhaTXT(*topo, arquivoPilha) == -1) {
         printf("Não foi possível atualizar a base de dados.\nTente novamente...\n\n");
         pop(topo);
         inserirPacienteInicioFila(front, back, data);
@@ -309,6 +308,10 @@ int main()
     char valor[50];
     char simNao;
     char opcao = -1;
+
+    strcpy(arquivoPilha, "db/pilha.txt");
+    strcpy(arquivoFila, "db/fila.txt");
+    strcpy(arquivoFilaPrioridade, "db/fila_prioridade.txt");
 
     if (inicializarDadosTXT(&inicio, &fim, &inicioP, &fimP, &topo) == -1) {
         printf("Erro ao carregar os dados da aplicação.\nEncerrando...");
@@ -341,7 +344,7 @@ int main()
                     adicionarFila(&inicio, &fim, valor);
 
                     // Tenta atualizar a base de dados, e informa caso não dê, desfazendo as alterações
-                    if (atualizarDadosFilaTXT(inicio, "db/fila.txt") == -1) {
+                    if (atualizarDadosFilaTXT(inicio, arquivoFila) == -1) {
                         removerPacienteFila(&inicio, &fim);
                         printf("Não foi possível adicionar o paciente...\nTente novamente!\n\n");
                     }
@@ -349,7 +352,7 @@ int main()
                     adicionarFila(&inicioP, &fimP, valor);
                     
                     // Tenta atualizar a base de dados, e informa caso não dê, desfazendo as alterações
-                    if (atualizarDadosFilaTXT(inicioP, "db/fila_prioridade.txt") == -1) {
+                    if (atualizarDadosFilaTXT(inicioP, arquivoFilaPrioridade) == -1) {
                         removerPacienteFila(&inicioP, &fimP);
                         printf("Não foi possível adicionar o paciente...\nTente novamente!\n\n");
                     }
@@ -359,10 +362,10 @@ int main()
                break;
             case 2:
                 if(!filaVazia(inicioP)){
-                    atenderPaciente(&inicioP, &fimP, &topo, "db/fila_prioridade.txt");
+                    atenderPaciente(&inicioP, &fimP, &topo, arquivoFilaPrioridade);
                 }
                 else if(!filaVazia(inicio)){
-                    atenderPaciente(&inicio, &fim, &topo, "db/fila.txt");
+                    atenderPaciente(&inicio, &fim, &topo, arquivoFila);
                 }
                 else
                     printf("Nenhum paciente foi atendido, pois a fila estava vazia.");
@@ -401,7 +404,7 @@ int main()
 
                     No *pacienteRemovido = removerPacienteFilaPorValor(&inicio, valor);
                     if(pacienteRemovido) {
-                        if (atualizarDadosFilaTXT(inicio, "db/fila.txt") == -1) {
+                        if (atualizarDadosFilaTXT(inicio, arquivoFila) == -1) {
                             inserirPacientePosicao(&inicio, anterior, pacienteRemovido);
                             printf("\nNão foi possível remover o paciente...\nTente Novamente!\n");
                         } else {
@@ -420,7 +423,7 @@ int main()
 
                         pacienteRemovido = removerPacienteFilaPorValor(&inicioP, valor);
                         if (pacienteRemovido) {
-                            if (atualizarDadosFilaTXT(inicioP, "db/fila_prioridade.txt") == -1) {
+                            if (atualizarDadosFilaTXT(inicioP, arquivoFilaPrioridade) == -1) {
                                 inserirPacientePosicao(&inicioP, anterior, pacienteRemovido);
                                 printf("\nNão foi possível remover o paciente...\nTente Novamente!\n");
                             } else {
