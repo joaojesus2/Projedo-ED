@@ -7,7 +7,7 @@ typedef struct No{
     struct No *prox;
 }No;
 
-/////// Implementação Pilha - Alocação Dinâmica
+//// Implementação Pilha - Alocação Dinâmica ////
 
 // Verifica se a pilha está vazia
 int pilhaVazia(No *topo){
@@ -38,33 +38,29 @@ void push(No **topo, const char *data) {
     *topo = novoNo;
 }
 
-// Remove um nó da pilha - não retorna o dado do nó removido
-int pop(No **top) {
-    
-    // Verifica se a pilha está vazia
-    if (*top == NULL) {
-        printf("A pilha está vazia!\n");
+// Remove um paciente da pilha
+int pop(No **topo) {
+    if (pilhaVazia(*topo)) {
         return -1;
     } 
     
-    No* tmp = *top;     
-    *top = tmp->prox;    
+    No* tmp = *topo;     
+    *topo = tmp->prox;    
     free(tmp);
-    
+
     return 0;
 }
 
-// Consulta valor do topo da pilha
-const char* top(No *top) {
-    if (top == NULL) {
+// Retorna paciente do topo da pilha
+const char* top(No *topo) {
+    if (pilhaVazia(topo)) {
         return "ERRO";
     }
     
-    return top->data;
+    return topo->data;
 }
-/////
 
-///// Implementação Fila - Alocação Dinâmica
+//// Implementação Fila - Alocação Dinâmica ////
 
 // Verifica se a fila está vazia
 int filaVazia(No *inicio){
@@ -103,6 +99,7 @@ void mostrarFila(No *f, No *fP){
     }
 }
 
+// Remove o primeiro paciente da fila
 int removerPacienteFila(No **front, No **back) {
     if (*front == NULL) return -1;
 
@@ -115,6 +112,7 @@ int removerPacienteFila(No **front, No **back) {
     return 0;
 }
 
+// Remove o paciente da fila com base na sua identidade
 No* removerPacienteFilaPorValor(No **lista, const char *valor) {
     No *atual = *lista;
     No *anterior = NULL;
@@ -136,19 +134,18 @@ No* removerPacienteFilaPorValor(No **lista, const char *valor) {
     return atual;
 }
 
-void inserirPacientePosicao(No **lista, No *anterior, No *paciente) {
+// Insere um paciente em uma posição específica com base no paciente anterior
+void inserirPacientePosicao(No **inicio, No *anterior, No *paciente) {
     if (anterior == NULL) {
-        paciente->prox = *lista;
-        *lista = paciente;
+        paciente->prox = *inicio;
+        *inicio = paciente;
     } else {
         paciente->prox = anterior->prox;
         anterior->prox = paciente;
     }
 }
 
-/////
-
-// Limpa a lista
+// Libera a memória de fila e pilha
 void limparLista(No *lista){
     No *temp;
     while (lista != NULL){
@@ -158,9 +155,9 @@ void limparLista(No *lista){
     }
 }
 
-////// Persistência de Dados - fila.txt, fila_prioridade.txt, pilha.txt //////
+//// Persistência de Dados - fila.txt, fila_prioridade.txt, pilha.txt ////
 
-// Carrega os dados dos arquivos de fila 
+// Carrega os dados dos arquivos de fila
 int carregarDadosFilaTXT(No **inicio, No **fim, const char *nomeArquivo) {
     FILE *arquivo = fopen(nomeArquivo, "r");
     if (arquivo == NULL) return -1;
@@ -177,7 +174,7 @@ int carregarDadosFilaTXT(No **inicio, No **fim, const char *nomeArquivo) {
     return 0;
 }
 
-// Carrega os dados dos arquivos de pilha 
+// Carrega os dados do arquivo da pilha 
 int carregarDadosPilhaTXT(No **topo, const char *nomeArquivo) {
     FILE *arquivo = fopen(nomeArquivo, "r");    // Abre o arquivo para leitura 
     if (arquivo == NULL) return -1;     // Erro 
@@ -194,7 +191,7 @@ int carregarDadosPilhaTXT(No **topo, const char *nomeArquivo) {
     return 0;
 }
 
-// Atualiza os dados da fila 
+// Atualiza os dados da fila no arquivo - sobrescrita
 int atualizarDadosFilaTXT(No *inicio, const char *nomeArquivo) {
     FILE *arquivo = fopen(nomeArquivo, "w");    // Abre o arquivo para escrita
     if (arquivo == NULL) return -1;     // Erro
@@ -210,35 +207,31 @@ int atualizarDadosFilaTXT(No *inicio, const char *nomeArquivo) {
     return 0;
 }
 
-// Atualiza os dados da pilha
+// Atualiza os dados da pilha no arquivo - sobrescrita
 int atualizarDadosPilhaTXT(No *topo, const char *nomeArquivo) {
     int tamanho = 0;
     No *atual = topo;
 
-    // Conta quandos nós tem a pilha
     while (atual != NULL) {
         tamanho++;
         atual = atual->prox;
     }
 
-    // Vetor para armazenar os ponteiros dos nós
     No **vetor = (No **)malloc(tamanho * sizeof(No *));
     atual = topo;
 
-    // Armazena ponteiro a ponteiro no vetor
     for (int i = 0; i < tamanho; i++) {
         vetor[i] = atual;
         atual = atual->prox;
     }
 
-    FILE *arquivo = fopen(nomeArquivo, "w"); // Abre o arquivo para escrita
+    FILE *arquivo = fopen(nomeArquivo, "w"); 
     
     if (arquivo == NULL) {
         free(vetor);
         return -1;
     }
 
-    // Grava os dados da pilha começando pelo último item
     for (int i = tamanho - 1; i >= 0; i--) {
         fprintf(arquivo, "%s\n", vetor[i]->data);
     }
@@ -274,6 +267,9 @@ int inicializarDadosTXT(No **inicio, No **fim, No **inicioP, No **fimP, No **top
     }
 }
 
+//// Funções para desfazer alterações caso haja erro na escrita dos arquivos de dados ////
+
+// Insere paciente no início da fila
 void inserirPacienteInicioFila(No **front, No**back, const char *data) {
     No *novoNo = (No *)malloc(sizeof(No));
     strcpy(novoNo->data, data);
@@ -302,14 +298,14 @@ void atenderPaciente(No **front, No **back, No **topo, const char *nomeArquivoFi
     
 }
 
-/////// Programa Principal
+//// Programa Principal ////
 int main()
 {
-    No *topo = NULL;    // topo da pilha
-    No *inicio = NULL;  // início da fila de pacientes não prioritários
-    No *fim = NULL; // fim da fila de pacientes não prioritários
-    No *inicioP = NULL; // inicio da fila de prioridade
-    No *fimP = NULL; // fim da fila de prioridade
+    No *topo = NULL;    // topo - pilha
+    No *inicio = NULL;  // início - fila de pacientes não prioritários
+    No *fim = NULL; // fim - fila de pacientes não prioritários
+    No *inicioP = NULL; // inicio - fila de prioridade
+    No *fimP = NULL; // fim - fila de prioridade
     char valor[50];
     char simNao;
     char opcao = -1;
@@ -446,9 +442,10 @@ int main()
 
     printf("Encerrando o programa...\n");
 
-    limparLista(inicioP);   // limpa fila de pacientes prioritários
-    limparLista(inicio);    // limpa fila de pacientes não prioritários
-    limparLista(topo);  // limpa pilha 
+    // Limpa memória
+    limparLista(inicioP);   
+    limparLista(inicio);    
+    limparLista(topo);  
     
     return 0;
 }
