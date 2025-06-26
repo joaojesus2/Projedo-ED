@@ -260,7 +260,7 @@ int inicializarDadosTXT(No **inicio, No **fim, No **inicioP, No **fimP, No **top
     }
 
     // Abre o arquivo da pilha e carrega os dados
-    if(carregarDadosPilhaTXT(topo, arquivoPilha) == -1) {
+    if(carregarDadosPilhaTXT(topo) == -1) {
         return -1;
     }
 }
@@ -287,7 +287,7 @@ void atenderPaciente(No **front, No **back, No **topo, const char *nomeArquivoFi
     push(topo, data);   
 
     // Tenta atualizar os arquivos com as alterações - caso não dê alerta e desfaz as alterações
-    if (atualizarDadosFilaTXT(*front, nomeArquivoFila) == -1 || atualizarDadosPilhaTXT(*topo, arquivoPilha) == -1) {
+    if (atualizarDadosFilaTXT(*front, nomeArquivoFila) == -1 || atualizarDadosPilhaTXT(*topo) == -1) {
         printf("Não foi possível atualizar a base de dados.\nTente novamente...\n\n");
         pop(topo);
         inserirPacienteInicioFila(front, back, data);
