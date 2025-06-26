@@ -1,3 +1,6 @@
-fila.txt
-fila_prioridade.txt
-pilha.txt
+/src/db/fila.txt
+/src/db/fila_prioridade.txt
+/src/db/pilha.txt
+
+/src/main.exe
+/src/main.o
