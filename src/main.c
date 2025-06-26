@@ -180,8 +180,8 @@ int carregarDadosFilaTXT(No **inicio, No **fim, const char *nomeArquivo) {
 
 // Carrega os dados do arquivo da pilha 
 int carregarDadosPilhaTXT(No **topo) {
-    FILE *arquivo = fopen(arquivoPilha, "r");    // Abre o arquivo para leitura 
-    if (arquivo == NULL) return -1;     // Erro 
+    FILE *arquivo = fopen(arquivoPilha, "r");    
+    if (arquivo == NULL) return -1;      
     
     char linha[50];
 
